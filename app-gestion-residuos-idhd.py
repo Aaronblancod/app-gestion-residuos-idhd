@@ -75,7 +75,7 @@ st.subheader ('Elaborado por: Aaron Blanco (B91088) y Aristides García (B73114)
 # Cargar datos de botaderos con IDHD
 estado_carga_botaderos_idhd = st.text('Cargando datos de los botaderos y su relación con el Índice de Desarrollo Humano ajustado por Desigualdad (IDHD)...')
 botaderos_idhd = cargar_botaderos_idhd()
-estado_carga_botaderos_idhd.text('Los datos de los botaderos y su relación el Índice de Desarrollo Humano ajustado por Desigualdad (IDHD) fueron cargados.')
+estado_carga_botaderos_idhd.text('Los datos de los botaderos y su relación con el Índice de Desarrollo Humano ajustado por Desigualdad (IDHD) fueron cargados.')
 
 # Cargar datos geoespcailes de botaderos
 estado_carga_botaderos_gdf = st.text('Cargando datos geoespaciales de los botaderos...')
@@ -155,9 +155,7 @@ botaderos_gdf_merged = botaderos_gdf_merged.rename(columns={'tipo_x': 'tipo de b
 
 # Mostrar la tabla
 st.subheader('Datos seleccionables sobre la gestión de residuos y su relación con el Índice de Desarrollo Humano ajustado por Desigualdad (IDHD) según provincia')
-st.dataframe(botaderos_idhd_filtrados, hide_index=True) 
-#st.dataframe(cantones_gdf_merged, hide_index=True)
-#st.dataframe(botaderos_gdf_merged, hide_index=True)
+st.dataframe(botaderos_idhd_filtrados, hide_index=True)
 
 
 # ----- Gráfico de líneas de la evolución del IDHD en cada cantón que contiene al menos un botadero -----
@@ -202,7 +200,7 @@ fig3.update_layout(
 )
 
 # Mostrar el gráfico
-st.subheader('Evolución del IDHD entre 2010 y 2020 por cantón con presencia de botaderos según provincia')
+st.subheader('Evolución del IDHD por cantón con presencia de botaderos entre 2010 y 2020 por cantón con presencia de botaderos según provincia')
 st.plotly_chart(fig3)
 
 # # ----- MAPA SELECCIONADO -----
@@ -210,22 +208,11 @@ st.plotly_chart(fig3)
 
 # # # ----- Mapa interactivo: Cantones con presencia de botaderos y su relación con el IDHD -----
 
-# ----- Proyección de trabajo -----
-crs_trabajo = "EPSG:5367"  # Proyección para cálculos y simplificaciones
-crs_mapa = "EPSG:4326"     # Proyección compatible con mapas base
-
-# Transformar datos a la proyección de trabajo
-cantones_gdf_merged = cantones_gdf_merged.to_crs(crs_trabajo)
-provincias_gdf = provincias_gdf.to_crs(crs_trabajo)
+botaderos_gdf_merged = botaderos_gdf_merged.to_crs("EPSG:4326")
+provincias_gdf = provincias_gdf.to_crs("EPSG:4326")
 
 # Simplificar geometrías de provincias
-provincias_gdf['geometry'] = provincias_gdf['geometry'].simplify(tolerance=0.01, preserve_topology=True)
-
-
-# Convertir datos a la proyección compatible con el mapa
-cantones_gdf_merged = cantones_gdf_merged.to_crs(crs_mapa)
-provincias_gdf = provincias_gdf.to_crs(crs_mapa)
-
+provincias_gdf['geometry'] = provincias_gdf['geometry'].simplify(tolerance=0.09, preserve_topology=True)
 
 # Calcular el centro del mapa basado en geometrías transformadas
 centro = [
@@ -277,7 +264,6 @@ esri_satellite = folium.TileLayer(
 ).add_to(mapa)
 
 # ----- Capa de botaderos -----
-botaderos_gdf_merged = botaderos_gdf_merged.to_crs(crs_mapa)
 botaderos_gdf_merged.explore(
     m=mapa,
     name='Localización de los botaderos',
@@ -288,19 +274,19 @@ botaderos_gdf_merged.explore(
 )
 
 # Añadir la capa de provincias utilizando geopandas explore
-provincias_gdf = provincias_gdf.to_crs(crs_mapa)
 provincias_gdf.explore(
     m=mapa,  # Mapa base de folium
     name="Provincias",  # Nombre de la capa
     color="grey",  # Color de las líneas de las provincias
     style_kwds={"fillOpacity": 0},  # Transparencia total del relleno
-    tooltip="provincia",  # Mostrar el nombre de la provincia al pasar el cursor
-    highlight=False  # Resaltar la provincia al pasar el cursor
+    tooltip='provincia',
+    highlight=False,  # Desactivar resaltar al pasar el cursor
+    popup=True  # muestra popup al hacer clic
 )
 
 # ----- Agregar control de capas -----
 folium.LayerControl().add_to(mapa)
 
 # ----- Mostrar el mapa en Streamlit -----
-st.subheader('Relación entre la presencia de botaderos y el promedio del IDHD entre 2010 y 2020 por cantón según provincia')
+st.subheader('Relación entre los cantones con presencia de botaderos y su promedio del IDHD entre 2010 y 2020 según provincia')
 st_folium(mapa, width=700, height=600)
