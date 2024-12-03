@@ -212,7 +212,7 @@ botaderos_gdf_merged = botaderos_gdf_merged.to_crs("EPSG:4326")
 provincias_gdf = provincias_gdf.to_crs("EPSG:4326")
 
 # Simplificar geometrías de provincias
-provincias_gdf['geometry'] = provincias_gdf['geometry'].simplify(tolerance=0.09, preserve_topology=True)
+#provincias_gdf['geometry'] = provincias_gdf['geometry'].simplify(tolerance=0.01, preserve_topology=True)
 
 # Calcular el centro del mapa basado en geometrías transformadas
 centro = [
@@ -240,7 +240,7 @@ folium.GeoJson(
     style_function=lambda feature: {
         'fillColor': colormap(feature['properties']['media_IDHD']),
         'color': 'black',
-        'weight': 1,
+        'weight': 0,
         'fillOpacity': 0.7,
     },
     tooltip=GeoJsonTooltip(
@@ -254,14 +254,25 @@ folium.GeoJson(
 colormap.caption = "Media del IDHD (2010-2020)"
 colormap.add_to(mapa)
 
-# ----- Capa base opcional: Esri Satellite -----
+ # ----- Capa base opcional: Esri Satellite -----
 esri_satellite = folium.TileLayer(
-    tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attr='Esri',
-    name='Esri Satellite',
-    overlay=False,
-    control=True
-).add_to(mapa)
+     tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+     attr='Esri',
+     name='Esri Satellite',
+     overlay=False,
+     control=True
+ ).add_to(mapa)
+
+# Añadir la capa de provincias
+provincias_gdf.explore(
+    m=mapa,  # Mapa base de folium
+    name="Provincias",  # Nombre de la capa
+    color="grey",  # Color de las líneas de las provincias
+    style_kwds={"fillOpacity": 0},  # Transparencia total del relleno
+    tooltip='provincia',
+    popup=True  # muestra popup al hacer clic
+)
+
 
 # ----- Capa de botaderos -----
 botaderos_gdf_merged.explore(
@@ -273,16 +284,6 @@ botaderos_gdf_merged.explore(
     popup=True
 )
 
-# Añadir la capa de provincias utilizando geopandas explore
-provincias_gdf.explore(
-    m=mapa,  # Mapa base de folium
-    name="Provincias",  # Nombre de la capa
-    color="grey",  # Color de las líneas de las provincias
-    style_kwds={"fillOpacity": 0},  # Transparencia total del relleno
-    tooltip='provincia',
-    highlight=False,  # Desactivar resaltar al pasar el cursor
-    popup=True  # muestra popup al hacer clic
-)
 
 # ----- Agregar control de capas -----
 folium.LayerControl().add_to(mapa)
