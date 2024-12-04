@@ -1,4 +1,4 @@
-# ----- GF-0657: PORGRAMACIÓN EN SIG (2024) | PROFESOR: MANUEL VARGAS TRABAJO FINAL -----
+# ----- GF-0657: PORGRAMACIÓN EN SIG (2024) | PROFESOR: MANUEL VARGAS | TRABAJO FINAL -----
 # ----- ESTUDIANTES AARON BLANCO (B91088) Y ARISTIDES GARCÍA (B73114) -----
 
 # ----- Carga y configuración de los paquetes -----
@@ -234,26 +234,6 @@ colormap = LinearColormap(
     vmax=cantones_gdf_merged['media_IDHD'].max()   # Valor máximo
 )
 
-folium.GeoJson(
-    cantones_gdf_merged,
-    name="Cantones con la Media IDHD (2010-2020) según provincia",
-    style_function=lambda feature: {
-        'fillColor': colormap(feature['properties']['media_IDHD']),
-        'color': 'black',
-        'weight': 0,
-        'fillOpacity': 0.7,
-    },
-    tooltip=GeoJsonTooltip(
-        fields=["canton", "media_IDHD"],
-        aliases=["Cantón:", "Media IDHD:"],
-        localize=True
-    )
-).add_to(mapa)
-
-# Agregar la leyenda de la paleta de colores
-colormap.caption = "Media del IDHD (2010-2020)"
-colormap.add_to(mapa)
-
  # ----- Capa base opcional: Esri Satellite -----
 esri_satellite = folium.TileLayer(
      tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -272,6 +252,27 @@ provincias_gdf.explore(
     tooltip='provincia',
     popup=True  # muestra popup al hacer clic
 )
+
+
+folium.GeoJson(
+    cantones_gdf_merged,
+    name="Cantones con la Media IDHD (2010-2020) según provincia",
+    style_function=lambda feature: {
+        'fillColor': colormap(feature['properties']['media_IDHD']),
+        'color': 'black',
+        'weight': 0,
+        'fillOpacity': 0.7,
+    },
+    tooltip=GeoJsonTooltip(
+        fields=["canton", "provincia", "media_IDHD"],
+        aliases=["Cantón:", "Provincia:", "Media IDHD:"],
+        localize=True
+    )
+).add_to(mapa)
+
+# Agregar la leyenda de la paleta de colores
+colormap.caption = "Media del IDHD (2010-2020)"
+colormap.add_to(mapa)
 
 
 # ----- Capa de botaderos -----
